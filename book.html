@@ -398,6 +398,13 @@
                                 </tbody>
                             </table>
                         </div>
+                        <ul class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                            </ul>
                     </div>
                 </div>
 
@@ -540,11 +547,11 @@
 <script src="js/sb-admin-2.min.js"></script>
 
 <!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<!-- <script src="vendor/datatables/jquery.dataTables.min.js"></script> -->
+<!-- <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script> -->
 
 <!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>
+<!-- <script src="js/demo/datatables-demo.js"></script> -->
 <script>
     let jwtToken = null;
     let modalCreEdit = {
@@ -563,14 +570,17 @@
                 success : function (data) {
                     $('#featured_book').empty(); // Clear existing list
                     console.log(data);
+                    let defaultImageUrl = "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png";
                     let bookHtml = data.map((book) => {
+                         let imageUrl = book.image != null ? "http://localhost:8080" + book.image.fileUrl : defaultImageUrl;
                         return `
                                 <tr>
                                             <td>${book.id}</td>
                                             <td>${book.name}</td>
                                             <td>${book.description}</td>
                                             <td>
-                                            <img src="${book.image}" width="70px" height="100px" alt="">
+                                            <img src="${imageUrl}" width="70px" height="100px" alt="">
+                                    
                                             </td>
                                             <td>${book.publisher}</td>
                                             <td>
@@ -727,6 +737,57 @@
                 }
             });
         }
+        // Function to make AJAX request when the page loads or when filter values change
+function getFilteredBooks() {
+    var kw = $('#keywordInput').val(); // Get keyword from input field
+    var categoryId = $('#categorySelect').val(); // Get category ID from select field
+
+    $.ajax({
+        type: 'GET',
+        url: '/filters',
+        data: {
+            kw: kw,
+            categoryId: categoryId
+        },
+        success: function(data) {
+            // Handle successful response
+            displayBooks(data);
+        },
+        error: function(xhr, status, error) {
+            // Handle errors
+            console.error('Error:', error);
+        }
+    });
+}
+
+// Function to display books in the UI
+function displayBooks(books) {
+    // Assuming there's a div with id 'bookList' where we want to display the books
+    var bookListDiv = $('#bookList');
+    bookListDiv.empty(); // Clear previous content
+
+    // Loop through the books and create HTML elements to display them
+    books.content.forEach(function(book) {
+        var bookItem = $('<div class="bookItem"></div>');
+        bookItem.append('<h2>' + book.title + '</h2>');
+        bookItem.append('<p>' + book.author + '</p>');
+        // Add more details as needed
+
+        bookListDiv.append(bookItem); // Append book item to the list
+    });
+
+    // Optionally, you can also handle pagination here if required
+}
+
+// Call the getFilteredBooks function when the page loads
+$(document).ready(function() {
+    getFilteredBooks();
+});
+
+// Optionally, you can also call the getFilteredBooks function when filter values change
+$('#keywordInput, #categorySelect').change(function() {
+    getFilteredBooks();
+});
 
     }
 
