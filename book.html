@@ -19,11 +19,32 @@
 
     <!-- Custom styles for this template -->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.css"
+          integrity="sha512-8D+M+7Y6jVsEa7RD6Kv/Z7EImSpNpQllgaEIQAtqHcI0H6F4iZknRj0Nx1DCdB+TwBaS+702BGWYC0Ze2hpExQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 
 </head>
+<style>
+    .pagination {
+        list-style-type: none;
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .pagination li {
+        margin: 0 5px;
+    }
+    .pagination li a {
+        text-decoration: none;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .pagination li a:hover {
+        background-color: #f2f2f2;
+    }
+</style>
 
 <body id="page-top">
 
@@ -179,7 +200,7 @@
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                     <div class="input-group">
                         <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                               aria-label="Search" aria-describedby="basic-addon2" onchange="getFilteredBooks()" id="txtFilter">
+                               aria-label="Search" aria-describedby="basic-addon2" oninput="getFilteredBooks()" id="txtFilter">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="button">
                                 <i class="fas fa-search fa-sm"></i>
@@ -487,12 +508,12 @@
                             <!-- Dữ liệu category có thể được lấy từ backend và đưa vào bằng cách sử dụng JavaScript -->
                             <!-- Ví dụ: const categories = ['Fashion', 'Electronics', 'Books']; -->
                             <!-- Và sau đó sử dụng vòng lặp để tạo tùy chọn cho mỗi category -->
-                            <option value="1">Truyen cuoi</option>
-                            <option value="2">Truyen dan gian</option>
-                            <option value="3">Toan hoc</option>
-                            <option value="4">Van hoc</option>
-                            <option value="5">Lich su</option>
-                            <option value="6">Hoa hoc</option>
+<!--                            <option value="1">Truyen cuoi</option>-->
+<!--                            <option value="2">Truyen dan gian</option>-->
+<!--                            <option value="3">Toan hoc</option>-->
+<!--                            <option value="4">Van hoc</option>-->
+<!--                            <option value="5">Lich su</option>-->
+<!--                            <option value="6">Hoa hoc</option>-->
                             <!-- Thêm các tùy chọn khác nếu cần -->
                         </select>
                     </div>
@@ -563,6 +584,7 @@
         page: 1,
         limit: 5,
     }
+    //Phần đã làm
     function getAllBook(){
 
             let user = JSON.parse(localStorage.getItem('user'));
@@ -652,6 +674,7 @@
             });
         }
     getAllBook();
+    getAllCategory();
     function addBook(){
         modalCreEdit.edit = false;
         $("#myModal").modal();
@@ -805,7 +828,74 @@ $(document).ready(function() {
 //     getFilteredBooks();
 // });
 
+const currentPage = 1; // Set current page
+
+    // Function to handle pagination click
+    function handlePaginationClick(page) {
+        // Your logic to load data for the selected page
+        console.log("Loading data for page " + page);
+    }
+
+    // Add event listeners to pagination links
+    document.getElementById('previous').addEventListener('click', () => {
+        if (currentPage > 1) {
+            handlePaginationClick(currentPage - 1);
+        }
+    });
+
+    document.getElementById('next').addEventListener('click', () => {
+        // Assuming you have a maximum number of pages defined
+        const maxPages = 3; // Change this to your actual maximum number of pages
+        if (currentPage < maxPages) {
+            handlePaginationClick(currentPage + 1);
+        }
+    });
+
+
+
+    document.getElementById('page1').addEventListener('click', () => {
+        handlePaginationClick(1);
+    });
+
+    document.getElementById('page2').addEventListener('click', () => {
+        handlePaginationClick(2);
+    });
+
+    document.getElementById('page3').addEventListener('click', () => {
+        handlePaginationClick(3);
+    });
+    function getAllCategory(){
+        let user = JSON.parse(localStorage.getItem("user"));
+        jwtToken = user.token;
+        $.ajax({
+            url: 'http://localhost:8080/api/categories',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + jwtToken
+            },
+            success: function(data) {
+                let categoryHtml = data.map((category, index)=>{
+                    return `
+                        <option value="${category.id}">${category.name}</option>
+                    `
+                }).join("");
+
+
+                console.log("categoryHtml", categoryHtml)
+                $("#category").append(categoryHtml)
+                //
+
+
+            },
+            error: function(err) {
+                console.error('Error retrieving category:', err);
+            }
+        });
+    }
+    //
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js" integrity="sha512-zlWWyZq71UMApAjih4WkaRpikgY9Bz1oXIW5G0fED4vk14JjGlQ1UmkGM392jEULP8jbNMiwLWdM8Z87Hu88Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 // Ngày mai anh quang support em cái code phần tìm kiếm và hỗ trợ để hạ màn case study
 </html>
