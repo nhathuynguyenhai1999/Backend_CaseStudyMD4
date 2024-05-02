@@ -419,13 +419,9 @@
                                 </tbody>
                             </table>
                         </div>
-                        <ul class="pagination">
-                            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                            </ul>
+                        <ul class="pagination" id="paggingBooks">
+
+                        </ul>
                     </div>
                 </div>
 
@@ -581,7 +577,7 @@
     };
     let pageable = {
         kw: "",
-        page: 1,
+        currentPage: 1,
         limit: 5,
     }
     //Phần đã làm
@@ -770,17 +766,17 @@
     function getFilteredBooks() {
         pageable.kw = $("#txtFilter").val();
 
-        console.log("pageable", pageable)
         $.ajax({
             type: 'GET',
             url: 'http://localhost:8080/api/books/filters',
             data: {
                 kw: pageable.kw,
+                page: pageable.currentPage-1
             },
             success: function(data) {
                 // Handle successful response
-                console.log(data)
                 displayBooks(data);
+                displayPaggingBooks(data);
             },
             error: function(xhr, status, error) {
                 // Handle errors
@@ -815,7 +811,34 @@
                         `
         }).join("");
 
+        $("#tb-book").empty();
         $("#tb-book").html(bookHtml);
+    }
+
+    function displayPaggingBooks(data){
+        /*
+        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+         */
+        let strPagging = "";
+        if(pageable.currentPage > 1){
+            strPagging += `<li class="page-item" data-page ="${pageable.currentPage-1}"><a class="page-link" href="#" >Previous</a></li>`;
+        }
+        for(let i = 1;i<= data.totalPages; i++){
+            strPagging += `<li class="page-item" data-page ="${i}"><a class="page-link" href="#" >${i}</a></li>`
+        }
+        if(pageable.currentPage < data.totalPages){
+            strPagging += ` <li class="page-item" data-page ="${pageable.currentPage+1}"><a class="page-link" href="#" >Next</a></li>`;
+        }
+        $("#paggingBooks").html(strPagging);
+
+        $(".page-item").on("click", function(evt){
+            pageable.currentPage = $(this).attr("data-page");
+            getFilteredBooks();
+        })
     }
 
 // Call the getFilteredBooks function when the page loads
@@ -823,11 +846,7 @@ $(document).ready(function() {
     getFilteredBooks();
 });
 
-// Optionally, you can also call the getFilteredBooks function when filter values change
-// $('#keywordInput, #categorySelect').change(function() {
-//     getFilteredBooks();
-// });
-
+/*
 const currentPage = 1; // Set current page
 
     // Function to handle pagination click
@@ -864,6 +883,7 @@ const currentPage = 1; // Set current page
     document.getElementById('page3').addEventListener('click', () => {
         handlePaginationClick(3);
     });
+ */
     function getAllCategory(){
         let user = JSON.parse(localStorage.getItem("user"));
         jwtToken = user.token;
@@ -881,7 +901,6 @@ const currentPage = 1; // Set current page
                 }).join("");
 
 
-                console.log("categoryHtml", categoryHtml)
                 $("#category").append(categoryHtml)
                 //
 
